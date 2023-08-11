@@ -1,11 +1,12 @@
+import 'dart:async';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:route_panel/route_panel.dart';
 import 'package:tomato_timer/screens/setting_page.dart';
 
-import '../components/audio_player.dart';
 import '../components/circular_animation.dart';
 import '../components/clock_painter.dart';
 import '../model/data_model.dart';
@@ -14,8 +15,6 @@ class HomePage extends StatelessWidget {
   int appBarHeight = 100;
   double circleBorder = 30;
   double buttonSize = 48;
-  AudioPlayer _audioPlayer = AudioPlayer();
-  String _audioFilePath = 'path_to_your_audio_file.mp3'; // Replace with your audio file path
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +30,6 @@ class HomePage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
           title: Text(Provider.of<DataModel>(context, listen: true).time.toString()),
-          //title: Text(context.read<DataModel>().time.toString()),
           leading: IconButton(
             icon: const Icon(Icons.settings),
             tooltip: 'Show Snackbar',
@@ -51,21 +49,30 @@ class HomePage extends StatelessWidget {
           ]
       ),
       body: Center(
-        child: Stack(
-          children: [
-            Positioned(
-              top: 0,
-                child: SoundPlayerWidget(audioFilePath: 'assets/sounds/rain_thunder_storm.mp3'),
-                //Image.asset('assets/iii.png'),
-                //SoundPlayerWidget(audioFilePath: '/sounds/rain_thunder_storm.mp3'),
-            ),
-            Positioned(
-              top: 0,
-              child: CustomPaint(
-                painter: ClockPainter(screenHeight, screenWidth, currentColor),
+          child: Stack(
+            children: [
+              // Positioned(
+              //   top: 0,
+              //   left: 0,
+              //   right: 0,
+              //   child: Container(
+              //     height: 200,
+              //     color: Colors.blue,
+              //     child:  ClockWidget(),
+              //   ),
+              // ),
+              // Positioned(
+              //   top: 0,
+              //     child: SoundPlayerWidget(audioFilePath: 'assets/sounds/rain_thunder_storm.mp3'),
+              //     //Image.asset('assets/iii.png'),
+              // ),
+              Positioned(
+                top: 0,
+                child: CustomPaint(
+                  painter: ClockPainter(screenHeight, screenWidth, currentColor),
+                ),
               ),
-            ),
-            Positioned(
+              Positioned(
                 top: innerCircleTop,
                 left: innerCircleLeft,
                 child: CircularRevealAnimation(
@@ -74,8 +81,13 @@ class HomePage extends StatelessWidget {
                   size: Size(innerCircleWidth, innerCircleWidth),
                   color: Colors.black, // Color of the animated container
                 ),
-            ),
-            Positioned(
+              ),
+              Positioned(
+                  top: (screenHeight)/2 - appBarHeight - buttonSize/2,
+                  left: (screenWidth)/2 - 100,
+                  child: ClockWidget()
+              ),
+              Positioned(
                 top: (screenHeight)/2 - appBarHeight - buttonSize/2,
                 left: (screenWidth)/2 - buttonSize/2,
                 child: IconButton(
@@ -88,44 +100,74 @@ class HomePage extends StatelessWidget {
                     // Stop and Start
                   },
                 ),
-            ),
-          Positioned(
-            top: screenHeight - 200,
-            left: screenWidth/2 - 40,
-            child: OutlinedButton(
-              child: const Text('Quit'),
-              onPressed: () {
-                Provider.of<DataModel>(context, listen: false).setReset(true);
-                Provider.of<DataModel>(context, listen: false).setIsRunning(false);
-                Provider.of<DataModel>(context, listen: false).setTime(Provider.of<DataModel>(context, listen: false).time);
-              },
-            ),
-            )
-          ],
-        )
+              ),
+              Positioned(
+                top: screenHeight - 200,
+                left: screenWidth/2 - 40,
+                child: OutlinedButton(
+                  child: const Text('Quit'),
+                  onPressed: () {
+                    Provider.of<DataModel>(context, listen: false).setReset(true);
+                    Provider.of<DataModel>(context, listen: false).setIsRunning(false);
+                    Provider.of<DataModel>(context, listen: false).setTime(Provider.of<DataModel>(context, listen: false).time);
+                  },
+                ),
+              )
+            ],
+          )
       ),
     );
   }
 }
 
-
-// TODO: Make an route animation panel library
-class BottomToTopPageRoute extends PageRouteBuilder {
-  final Widget page;
-
-  BottomToTopPageRoute({required this.page}) : super(
-    pageBuilder: (context, animation, secondaryAnimation) => page,
-    transitionsBuilder: (context, animation, secondaryAnimation, child) {
-      const begin = Offset(0.0, 1.0);
-      const end = Offset.zero;
-      const curve = Curves.easeInOut;
-
-      var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-      var offsetAnimation = animation.drive(tween);
-
-      return SlideTransition(position: offsetAnimation, child: child);
-    },
-  );
+class ClockWidget extends StatefulWidget {
+  @override
+  _ClockWidgetState createState() => _ClockWidgetState();
 }
+
+class _ClockWidgetState extends State<ClockWidget> {
+
+  @override
+  void initState() {
+    super.initState();
+    _startCountdown();
+  }
+
+  void _startCountdown() {
+    Timer.periodic(Duration(seconds: 1), (timer) {
+      if (Provider.of<DataModel>(context, listen: false).isRunning &&
+          Provider.of<DataModel>(context, listen: false).time > 0) {
+        setState(() {
+          int seconds = Provider.of<DataModel>(context, listen: false).time;
+          Provider.of<DataModel>(context, listen: false).setTime(seconds-=1);
+        });
+      } else {
+        //timer.cancel(); // Stop the countdown when it reaches zero
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          '${(Provider.of<DataModel>(context).time/60).toInt()}:${ (Provider.of<DataModel>(context,listen: false).time%60 < 10)
+          ? "0${Provider.of<DataModel>(context,listen: false).time%60}"
+          : "${Provider.of<DataModel>(context,listen: false).time%60}"}',
+          style: const TextStyle(
+            fontSize: 80,
+            fontWeight: FontWeight.bold,
+            color: Colors.grey,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+
 
 

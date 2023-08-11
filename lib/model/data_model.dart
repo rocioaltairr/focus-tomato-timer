@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 class DataModel extends ChangeNotifier {
-  int _time = 10;
+  int _time = 25 * 60;
   Color _currentColor = Colors.amber;
-  bool _isRunning = true;
+  bool _isRunning = false;
   List<Color> _currentColors = [Colors.yellow, Colors.green];
   bool _reset = false;
 

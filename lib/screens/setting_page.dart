@@ -18,20 +18,20 @@ class SettingPage extends StatelessWidget {
       ),
       body: ListView(
         children: <Widget> [
-          ListTile(
-            title: const Text('Time'),
-            subtitle: const Text('Adjust the time'),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width:120,
-                  height: 60,
-                  child: TimeTextField(),
-                ),
-              ],
-            ),
-          ),
+          // ListTile(
+          //   title: const Text('Time'),
+          //   subtitle: const Text('Adjust the time'),
+          //   trailing: Row(
+          //     mainAxisSize: MainAxisSize.min,
+          //     children: [
+          //       Container(
+          //         width:120,
+          //         height: 60,
+          //         child: TimeTextField(),
+          //       ),
+          //     ],
+          //   ),
+          // ),
           ListTile(
             title: const Text("color"),
             trailing: ColorPicker(),
