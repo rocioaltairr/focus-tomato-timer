@@ -35,6 +35,14 @@ class DataModel extends ChangeNotifier {
 
   void setReset(bool setReset) {
     _reset = setReset;
+    _isRunning = false;
+    _time = 25 * 60;
     notifyListeners();
+  }
+
+  void resetTimer() {
+    _reset = true;
+    _isRunning = false;
+    _time = 25*60;
   }
 }
